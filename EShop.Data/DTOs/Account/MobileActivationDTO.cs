@@ -11,4 +11,9 @@ namespace EShop.Data.DTOs.Account
         public string ActivationCode { get; set; }
         public string? ReturnUrl { get; set; }
     }
+    public enum ActivationResult
+    {
+        Success,
+        Error
+    }
 }

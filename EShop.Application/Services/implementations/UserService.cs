@@ -4,7 +4,7 @@ using EShop.Data.Entities.Account;
 using EShop.Data.Repository;
 using Microsoft.EntityFrameworkCore;
 
-namespace EShop.Application.Services.Inplementations
+namespace EShop.Application.Services.Implementations
 {
     public class UserService : IUserService
     {

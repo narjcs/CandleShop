@@ -28,7 +28,7 @@ namespace EShop.Application.Services.Implementations
             {
                 //Login
                 var user = await _userRepository.GetQuery().FirstAsync(u => u.MobileNumber == dto.MobileNumber);
-                user.MobileActivationNumber = new Random().Next(10000,99999).ToString();
+                user.MobileActivationNumber = new Random().Next(10000, 99999).ToString();
                 await _userRepository.SaveAsync();
                 return;
             }
@@ -47,19 +47,51 @@ namespace EShop.Application.Services.Implementations
         {
             return await _userRepository.GetQuery().AnyAsync(u => u.MobileNumber == mobile);
         }
-        public Task EditUserDetail(EditUserInfoDTO dto)
+        // Receive updated user information from the edit form and save the changes to the database.
+        public async Task EditUserDetail(EditUserInfoDTO dto)
         {
-            throw new NotImplementedException();
+            var user = await _userRepository.GetEntityById(dto.UserId);
+
+            user.Address = dto.Address;
+            user.Email = dto.Email;
+            user.FullName = dto.FullName;
+            user.PostCode = dto.PostCode;
+
+            _userRepository.EditEntity(user);
+            await _userRepository.SaveAsync();
         }
 
-        public Task<EditUserInfoDTO> GetEditUserDetail(long userId)
+        // Get current user information from the database and return it as a DTO for the edit form.
+        public async Task<EditUserInfoDTO> GetEditUserDetail(long userId)
         {
-            throw new NotImplementedException();
+            var user = await _userRepository.GetEntityById(userId);
+            return new EditUserInfoDTO
+            {
+                UserId = userId,
+                Address = user.Address,
+                Email = user.Email,
+                FullName = user.FullName,
+                PostCode = user.PostCode
+            };
         }
 
-        public Task<UserDetailDTO> GetUserDetail(long userId)
+        // Get complete user details only for display.
+        public async Task<UserDetailDTO> GetUserDetail(long userId)
         {
-            throw new NotImplementedException();
+            var user = await _userRepository.GetEntityById(userId);
+            return new UserDetailDTO
+            {
+                Id = userId,
+                Address = user.Address,
+                Email = user.Email,
+                FullName = user.FullName,
+                PostCode = user.PostCode,
+                MobileNumber = user.MobileNumber,
+                CreateDate = user.CreateDate,
+                LastUpdateDate = user.LastUpdateDate,
+                IsDeleted = user.IsDeleted,
+                MobileActivationNumber = user.MobileActivationNumber
+            };
         }
         public Task<bool> SendActivationSms(string mobile)
         {

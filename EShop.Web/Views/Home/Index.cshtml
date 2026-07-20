@@ -1,1 +1,108 @@
-﻿
+﻿@{
+    ViewData["Title"] = "خانه";
+}
+
+<section class="hero">
+
+    <div class="container hero-wrapper">
+
+        <div class="hero-content">
+
+            <span>✨ مجموعه شمع‌های دست‌ساز</span>
+
+            <h1>
+                روشنایی خانه،
+                <br />
+                آرامش روح
+            </h1>
+
+            <p>
+                شمع‌های معطر و دست‌ساز با رایحه‌های طبیعی،
+                مناسب برای دکوراسیون منزل و هدیه دادن.
+            </p>
+
+            <a href="#" class="hero-btn">
+                مشاهده محصولات
+            </a>
+
+        </div>
+
+        <div class="hero-image">
+
+            <img src="https://images.unsplash.com/photo-1603006905003-be475563bc59?w=700" alt="Candles"/>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="categories">
+
+    <div class="container">
+
+        <div class="section-title">
+
+            <span>دسته بندی ها</span>
+
+            <h2>محصولات محبوب</h2>
+
+        </div>
+
+        <div class="category-grid">
+
+            <div class="category-card">
+
+                <div class="category-icon">🕯️</div>
+
+                <h4>شمع معطر</h4>
+
+                <p>24 محصول</p>
+
+            </div>
+
+            <div class="category-card">
+
+                <div class="category-icon">🎁</div>
+
+                <h4>ست هدیه</h4>
+
+                <p>15 محصول</p>
+
+            </div>
+
+            <div class="category-card">
+
+                <div class="category-icon">🌿</div>
+
+                <h4>شمع گیاهی</h4>
+
+                <p>18 محصول</p>
+
+            </div>
+
+            <div class="category-card">
+
+                <div class="category-icon">🏺</div>
+
+                <h4>شمع دکوراتیو</h4>
+
+                <p>30 محصول</p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+@await Html.PartialAsync("_ProductSection")
+
+@await Html.PartialAsync("_OfferBanner")
+
+@await Html.PartialAsync("_Statistics")
+
+@await Html.PartialAsync("_WhyUs")
+
+@await Html.PartialAsync("_Banner")

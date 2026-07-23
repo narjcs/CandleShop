@@ -478,18 +478,21 @@ nav {
 
 @media (max-width:992px) {
 
-    .hero .container {
+    .hero-wrapper {
         flex-direction: column;
         text-align: center;
         gap: 50px;
     }
 
-    .section-grid,
+    .category-grid,
     .product-grid,
-    .feature-grid,
-    .stats-grid,
-    .footer-grid {
+    .statistics .container,
+    .why-grid {
         grid-template-columns: repeat(2,1fr);
+    }
+
+    nav ul {
+        gap: 25px;
     }
 }
 
@@ -497,46 +500,113 @@ nav {
 
     .main-header .container {
         flex-direction: column;
-        gap: 20px;
+        height: auto;
+        padding: 15px 0;
+        gap: 15px;
     }
 
-    nav ul {
-        flex-wrap: wrap;
-        justify-content: center;
+    .logo {
+        order: 1;
     }
 
-    .hero-title {
-        font-size: 42px;
-    }
-
-    .section-grid,
-    .product-grid,
-    .feature-grid,
-    .stats-grid,
-    .footer-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .hero-image img {
+    nav {
+        order: 2;
         width: 100%;
     }
 
-    .offer-box {
-        padding: 60px 20px;
+        nav ul {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+    .header-icons {
+        order: 3;
+    }
+
+    .hero-content h1 {
+        font-size: 42px;
+        line-height: 60px;
+    }
+
+    .hero-content p {
+        font-size: 16px;
+    }
+
+    .category-grid,
+    .product-grid,
+    .statistics .container,
+    .why-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .offer-content h2 {
+        font-size: 36px;
+        line-height: 50px;
+    }
+
+    .banner h2 {
+        font-size: 36px;
     }
 }
 
 @media (max-width:576px) {
 
-    .hero-title {
-        font-size: 34px;
+    .container {
+        width: 95%;
     }
 
-    .section-title {
+    .hero {
+        padding: 50px 0;
+    }
+
+    .hero-content h1 {
         font-size: 32px;
+        line-height: 46px;
     }
 
-    .btn {
-        width: 100%;
+    .section-title h2 {
+        font-size: 28px;
+    }
+
+    .header-icons {
+        gap: 8px;
+    }
+
+        .header-icons a {
+            width: 36px;
+            height: 36px;
+        }
+}
+
+/*============== Mobile Menu ==============*/
+
+.mobile-menu {
+    display: none;
+    background: white;
+    box-shadow: 0 5px 20px rgba(0,0,0,.08);
+}
+
+    .mobile-menu a {
+        display: block;
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+        color: #333;
+        transition: .3s;
+    }
+
+        .mobile-menu a:hover {
+            background: #faf7f2;
+            color: #b48a56;
+        }
+
+@media (max-width:768px) {
+
+    .mobile-menu {
+        display: block;
+    }
+
+    nav {
+        display: none;
     }
 }

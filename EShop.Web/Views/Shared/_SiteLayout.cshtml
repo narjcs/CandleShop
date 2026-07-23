@@ -1,68 +1,24 @@
 ﻿<!DOCTYPE html>
 <html lang="fa" dir="rtl">
-
 <head>
 
-    @await Html.PartialAsync("_SiteHeaderRef")
+    <partial name="_SiteMetaTags" />
+    <partial name="_SiteHeaderRef" />
+    @RenderSection("_SiteHeaderSection", required: false)
+    <title>@ViewData["Title"]</title>
 
 </head>
 
 <body>
 
-    <header class="main-header">
-
-        <div class="container">
-
-            <div class="logo">
-                🕯️ Lumi Candle
-            </div>
-
-            <nav>
-
-                <ul>
-
-                    <li><a href="#">خانه</a></li>
-
-                    <li><a href="#">فروشگاه</a></li>
-
-                    <li><a href="#">محصولات</a></li>
-
-                    <li><a href="#">درباره ما</a></li>
-
-                    <li><a href="#">تماس با ما</a></li>
-
-                </ul>
-
-            </nav>
-
-            <div class="header-icons">
-
-                <a href="#">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                </a>
-
-                <a href="#">
-                    <i class="fa-regular fa-heart"></i>
-                </a>
-
-                <a href="#">
-                    <i class="fa-solid fa-cart-shopping"></i>
-                </a>
-
-                <a href="#">
-                    <i class="fa-regular fa-user"></i>
-                </a>
-
-            </div>
-
-        </div>
-
-    </header>
-
+    @await Component.InvokeAsync("SiteHeader")
     @RenderBody()
+    @await Component.InvokeAsync("SiteFooter")
+    @await Component.InvokeAsync("HomeCartSection")
 
-    @await Html.PartialAsync("_SiteFooterRef")
-
+    <partial name="_SiteMobileMenu" />
+    <partial name="_SiteFooterRef" />
+    @RenderSection("_SiteFooterSection", required: false)
 </body>
 
 </html>

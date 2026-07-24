@@ -2,7 +2,7 @@
 
 namespace EShop.Data.DTOs.Account
 {
-    public class RegisterUserDTO
+    public class RegisterUserDTO : CaptchaDTO
     {
         [Display(Name = "شماره موبایل")]
         [Required(ErrorMessage = "لطفا {0} را وارد کنید")]

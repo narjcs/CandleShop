@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Data.DTOs.Account
 {
-    public class EditUserInfoDTO
+    public class EditUserInfoDTO : CaptchaDTO
     {
         public long UserId { get; set; }
 

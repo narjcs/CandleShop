@@ -47,6 +47,7 @@ namespace EShop.Application.Services.Implementations
         {
             return await _userRepository.GetQuery().AnyAsync(u => u.MobileNumber == mobile);
         }
+        
         // Receive updated user information from the edit form and save the changes to the database.
         public async Task EditUserDetail(EditUserInfoDTO dto)
         {
@@ -93,9 +94,24 @@ namespace EShop.Application.Services.Implementations
                 MobileActivationNumber = user.MobileActivationNumber
             };
         }
+        
         public Task<bool> SendActivationSms(string mobile)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<bool> CheckMobileAuthorization(MobileActivationDTO dto)
+        {
+            var user = await GetUserByMobile(dto.Mobile);
+            if (user == null)
+                return false;
+
+            return dto.ActivationCode == user.MobileActivationNumber;
+        }
+
+        public async Task<User?> GetUserByMobile(string mobile)
+        {
+            return await _userRepository.GetQuery().FirstOrDefaultAsync(u => u.MobileNumber == mobile);
         }
         #endregion
     }

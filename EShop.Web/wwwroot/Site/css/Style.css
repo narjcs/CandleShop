@@ -610,3 +610,36 @@ nav {
         display: none;
     }
 }
+
+/*============== Login ==============*/
+
+.account-page {
+    min-height: 100vh;
+    background: #f7f4ef;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.account-card {
+    width: 430px;
+    background: white;
+    border-radius: 18px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,.08);
+}
+
+.account-logo {
+    font-size: 55px;
+    margin-bottom: 20px;
+}
+
+.account-card h2 {
+    font-weight: 700;
+    color: #5f4634;
+}
+
+.account-card p {
+    color: #777;
+}

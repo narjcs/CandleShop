@@ -1,5 +1,66 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model EShop.Data.DTOs.Account.RegisterUserDTO
+
 @{
+    ViewData["Title"] = "ورود / ثبت نام";
+    Layout = "_SiteLayout";
+}
+
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-5">
+
+            <div class="card shadow">
+
+                <div class="card-body p-4">
+
+                    <h3 class="text-center mb-4">
+                        ورود / ثبت نام
+                    </h3>
+
+                    <form asp-controller="Account"
+                          asp-action="RegisterOrLogin"
+                          method="post">
+
+                        @Html.AntiForgeryToken()
+
+                        <input type="hidden"
+                               asp-for="ReturnUrl" />
+
+                        <div class="mb-3">
+
+                            <label asp-for="MobileNumber"
+                                   class="form-label">
+                            </label>
+
+                            <input asp-for="MobileNumber"
+                                   class="form-control"
+                                   placeholder="09xxxxxxxxx" />
+
+                            <span asp-validation-for="MobileNumber"
+                                  class="text-danger"></span>
+
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-dark w-100">
+                            ادامه
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section _SiteFooterSection
+{
+    <partial name="_ValidationScriptsPartial" />
 }

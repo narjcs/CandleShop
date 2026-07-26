@@ -97,5 +97,12 @@ namespace EShop.Web.Controllers
             return View(dto);
         }
         #endregion
+
+        [Route("Log-out")]
+        public async Task<IActionResult> LogOut()
+        {
+            await HttpContext.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
     }
 }

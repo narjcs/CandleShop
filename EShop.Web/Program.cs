@@ -3,6 +3,10 @@ using EShop.Application.Services.Implementations;
 using EShop.Data.Context;
 using EShop.Data.Repository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using GoogleReCaptcha.V3.Interface;
+using GoogleReCaptcha.V3;
 
 namespace EShop.Web
 {
@@ -13,6 +17,7 @@ namespace EShop.Web
             var builder = WebApplication.CreateBuilder(args);
 
             //DI
+            builder.Services.AddHttpClient<ICaptchaValidator , GoogleReCaptchaValidator>();
             builder.Services.AddScoped(typeof(IGenericRepository<>),typeof(GenericRepository<>));
             builder.Services.AddScoped<IUserService,UserService>();
             //builder.Services.AddScoped<ISmsService,SmsService>();
@@ -21,6 +26,28 @@ namespace EShop.Web
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString(name: "DefaultConnection"));
+            });
+
+            //Data Protoction
+            builder.Services.AddDataProtection()
+                .PersistKeysToFileSystem(new DirectoryInfo(Directory.GetCurrentDirectory() + "//wwwroot/Auth//"))
+                .SetApplicationName("EShop")
+                .SetDefaultKeyLifetime(TimeSpan.FromDays(7));
+
+            //Authentication Configuration
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+
+            }).AddCookie(options =>
+            {
+                options.LoginPath = "/MobileAuthorization";
+                options.LogoutPath = "/Log-out";
+                options.ExpireTimeSpan = TimeSpan.FromDays(7);
+                options.SlidingExpiration = true;
             });
 
             builder.Services.AddControllersWithViews();
@@ -37,7 +64,7 @@ namespace EShop.Web
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(

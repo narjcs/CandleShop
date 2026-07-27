@@ -1,5 +1,117 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model EShop.Data.DTOs.Account.MobileActivationDTO
+
 @{
+    ViewData["Title"] = "تایید شماره موبایل";
+    Layout = "_SiteLayout";
+}
+
+<div class="account-page">
+
+    <div class="container">
+
+        <div class="row justify-content-center">
+
+            <div class="col-lg-5 col-md-7">
+
+                <div class="card shadow">
+
+                    <div class="card-body">
+
+                        <div class="text-center mb-4">
+
+                            <div style="font-size:55px;">
+                                🕯️
+                            </div>
+
+                            <h2 class="fw-bold mt-2">
+                                تایید شماره موبایل
+                            </h2>
+
+                            <p class="text-muted mb-1">
+                                کد ارسال شده به شماره موبایل را وارد کنید.
+                            </p>
+
+                            <small class="text-muted">
+                                @Model?.Mobile
+                            </small>
+
+                        </div>
+
+                        <form asp-controller="Account"
+                              asp-action="MobileAuthorization"
+                              method="post">
+
+                            @Html.AntiForgeryToken()
+
+                            <input asp-for="Mobile" type="hidden" />
+                            <input asp-for="ReturnUrl" type="hidden" />
+                            <input asp-for="Token" type="hidden" />
+
+                            <div class="mb-3">
+
+                                <label asp-for="ActivationCode" class="form-label">
+                                    کد تایید
+                                </label>
+
+                                <input asp-for="ActivationCode"
+                                       class="form-control text-center"
+                                       placeholder="12345"
+                                       autocomplete="one-time-code" />
+
+                                <span asp-validation-for="ActivationCode"
+                                      class="text-danger"></span>
+
+                            </div>
+
+                            <div class="text-center mt-3">
+
+                                <div id="otpTimer"
+                                     style="font-size:15px;color:#666;">
+                                </div>
+
+                                <a href="#"
+                                   id="resendCode"
+                                   style="display:none;text-decoration:none;font-weight:600;color:#b88952;">
+                                    🔄 ارسال مجدد کد
+                                </a>
+
+                            </div>
+
+                            <button type="submit"
+                                    class="btn btn-dark w-100">
+                                تایید و ورود
+                            </button>
+
+                        </form>
+
+                        <div class="text-center mt-4">
+
+                            <a asp-action="RegisterOrLogin"
+                               class="text-decoration-none">
+                                تغییر شماره موبایل
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section _SiteFooterSection
+{
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        window.onload = function () {
+            startOtpTimer();
+        };
+    </script>
 }

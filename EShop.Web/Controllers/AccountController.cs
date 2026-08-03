@@ -98,6 +98,14 @@ namespace EShop.Web.Controllers
         }
         #endregion
 
+        #region Resend Verification Code
+        public async Task<IActionResult> ResendVerificationCode(string mobileNumber)
+        {
+            await _userService.SendActivationSms(mobileNumber);
+            return RedirectToAction("MobileAuthorization");
+        }
+        #endregion
+
         #region Log Out
         [Route("Log-out")]
         public async Task<IActionResult> LogOut()

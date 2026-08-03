@@ -10,9 +10,11 @@ namespace EShop.Application.Services.Implementations
     {
         #region ctor
         private readonly IGenericRepository<User> _userRepository;
-        public UserService(IGenericRepository<User> userReository)
+        private readonly ISmsService _smsService;
+        public UserService(IGenericRepository<User> userReository, ISmsService smsService)
         {
             _userRepository = userReository;
+            _smsService = smsService;
         }
         public async ValueTask DisposeAsync()
         {
@@ -30,6 +32,7 @@ namespace EShop.Application.Services.Implementations
                 var user = await _userRepository.GetQuery().FirstAsync(u => u.MobileNumber == dto.MobileNumber);
                 user.MobileActivationNumber = new Random().Next(10000, 99999).ToString();
                 await _userRepository.SaveAsync();
+                await _smsService.SendVerificationSms(dto.MobileNumber , user.MobileActivationNumber);
                 return;
             }
 
@@ -41,6 +44,8 @@ namespace EShop.Application.Services.Implementations
             };
             await _userRepository.AddEntity(newUser);
             await _userRepository.SaveAsync();
+            await _smsService.SendVerificationSms(dto.MobileNumber, newUser.MobileActivationNumber);
+
         }
 
         public async Task<bool> CheckUserExistByMobile(string mobile)
@@ -94,10 +99,15 @@ namespace EShop.Application.Services.Implementations
                 MobileActivationNumber = user.MobileActivationNumber
             };
         }
-        
-        public Task<bool> SendActivationSms(string mobile)
+
+        public async Task<bool> SendActivationSms(string mobile)
         {
-            throw new NotImplementedException();
+            var user = await _userRepository.GetQuery().FirstOrDefaultAsync(u => u.MobileNumber == mobile);
+            if (user == null) return false;
+
+            user.MobileActivationNumber = new Random().Next(10000, 99999).ToString();
+            await _smsService.SendVerificationSms(mobile, user.MobileActivationNumber);
+            return true;
         }
 
         public async Task<bool> CheckMobileAuthorization(MobileActivationDTO dto)

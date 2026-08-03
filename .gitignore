@@ -362,3 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /EShop.Web/wwwroot/Auth/
+
+EShop.Web/appsettings.Development.json

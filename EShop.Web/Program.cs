@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using GoogleReCaptcha.V3.Interface;
 using GoogleReCaptcha.V3;
+using EShop.Application.Services.implementations;
 
 namespace EShop.Web
 {
@@ -20,7 +21,7 @@ namespace EShop.Web
             builder.Services.AddHttpClient<ICaptchaValidator , GoogleReCaptchaValidator>();
             builder.Services.AddScoped(typeof(IGenericRepository<>),typeof(GenericRepository<>));
             builder.Services.AddScoped<IUserService,UserService>();
-            //builder.Services.AddScoped<ISmsService,SmsService>();
+            builder.Services.AddScoped<ISmsService,SmsService>();
 
             //Db Configuration
             builder.Services.AddDbContext<ApplicationDbContext>(options =>

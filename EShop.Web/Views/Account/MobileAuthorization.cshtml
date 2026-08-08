@@ -5,113 +5,127 @@
     Layout = "_SiteLayout";
 }
 
+<style>
+    .timer-wrap {
+        margin-top: 16px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* برای وسط‌چین شدن نوار کوتاه */
+    }
+
+    .progress-line {
+        width: 100%;
+        max-width: 180px; /* طول نوار */
+        height: 3px;
+        background: #e9ecef;
+        border-radius: 999px;
+        overflow: hidden;
+        margin-bottom: 8px;
+    }
+
+        .progress-line span {
+            display: block;
+            height: 100%;
+            width: 100%;
+            background: #666;
+            transition: width 1s linear;
+        }
+
+    #otpTimer {
+        font-size: 14px;
+        color: #444;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    #resendCode {
+        display: none;
+        text-decoration: none;
+        font-weight: 600;
+        color: #b88952;
+        font-size: 14px;
+    }
+</style>
+
 <div class="account-page">
-
     <div class="container">
-
         <div class="row justify-content-center">
-
             <div class="col-lg-5 col-md-7">
-
                 <div class="card shadow">
-
                     <div class="card-body">
-
                         <div class="text-center mb-4">
-
-                            <div style="font-size:55px;">
-                                🕯️
-                            </div>
-
-                            <h2 class="fw-bold mt-2">
-                                تایید شماره موبایل
-                            </h2>
-
-                            <p class="text-muted mb-1">
-                                کد ارسال شده به شماره موبایل را وارد کنید.
-                            </p>
-
-                            <small class="text-muted">
-                                @Model?.Mobile
-                            </small>
-
+                            <div style="font-size:55px;">🕯️</div>
+                            <h2 class="fw-bold mt-2">تایید شماره موبایل</h2>
+                            <p class="text-muted mb-1">کد ارسال شده به شماره موبایل را وارد کنید.</p>
+                            <small class="text-muted">@Model?.Mobile</small>
                         </div>
 
-                        <form asp-controller="Account"
-                              asp-action="MobileAuthorization"
-                              method="post">
-
+                        <form asp-controller="Account" asp-action="MobileAuthorization" method="post">
                             @Html.AntiForgeryToken()
-
                             <input asp-for="Mobile" type="hidden" />
                             <input asp-for="ReturnUrl" type="hidden" />
                             <input asp-for="Token" type="hidden" />
 
                             <div class="mb-3">
-
-                                <label asp-for="ActivationCode" class="form-label">
-                                    کد تایید
-                                </label>
-
-                                <input asp-for="ActivationCode"
-                                       class="form-control text-center"
-                                       placeholder="12345"
-                                       autocomplete="one-time-code" />
-
-                                <span asp-validation-for="ActivationCode"
-                                      class="text-danger"></span>
-
+                                <label asp-for="ActivationCode" class="form-label">کد تایید</label>
+                                <input asp-for="ActivationCode" class="form-control text-center" placeholder="12345" autocomplete="one-time-code" />
+                                <span asp-validation-for="ActivationCode" class="text-danger small"></span>
                             </div>
 
-                            <div class="text-center mt-3">
-
-                                <div id="otpTimer"
-                                     style="font-size:15px;color:#666;">
+                            <div class="timer-wrap">
+                                <div class="progress-line">
+                                    <span id="progressBar"></span>
                                 </div>
-
-                                <a href="#"
-                                   id="resendCode"
-                                   style="display:none;text-decoration:none;font-weight:600;color:#b88952;">
-                                    🔄 ارسال مجدد کد
-                                </a>
-
+                                <div id="otpTimer"></div>
+                                <a href="#" id="resendCode">ارسال مجدد کد</a>
                             </div>
 
-                            <button type="submit"
-                                    class="btn btn-dark w-100">
-                                تایید و ورود
-                            </button>
-
+                            <button type="submit" class="btn btn-dark w-100 mt-3">تایید و ورود</button>
                         </form>
 
                         <div class="text-center mt-4">
-
-                            <a asp-action="RegisterOrLogin"
-                               class="text-decoration-none">
-                                تغییر شماره موبایل
-                            </a>
-
+                            <a asp-action="RegisterOrLogin" class="text-decoration-none small">تغییر شماره موبایل</a>
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
 </div>
 
 @section _SiteFooterSection
 {
     <partial name="_ValidationScriptsPartial" />
-
     <script>
         window.onload = function () {
             startOtpTimer();
         };
+
+        function startOtpTimer() {
+            let totalTime = 60;
+            let timeLeft = totalTime;
+            const timer = document.getElementById("otpTimer");
+            const progressBar = document.getElementById("progressBar");
+            const resendCode = document.getElementById("resendCode");
+            const progressContainer = document.querySelector(".progress-line");
+
+            const interval = setInterval(function () {
+                let minutes = Math.floor(timeLeft / 60);
+                let seconds = timeLeft % 60;
+
+                timer.innerText = "00:" + String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
+                progressBar.style.width = (timeLeft / totalTime * 100) + "%";
+
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    timer.style.display = "none";
+                    progressContainer.style.display = "none";
+                    resendCode.style.display = "inline-block";
+                }
+                timeLeft--;
+            }, 1000);
+        }
     </script>
 }
+

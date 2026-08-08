@@ -1,33 +1,32 @@
 ﻿<!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-
     <partial name="_SiteMetaTags" />
     <partial name="_SiteHeaderRef" />
     @RenderSection("_SiteHeaderSection", required: false)
-
     <title>@ViewData["Title"]</title>
-
 </head>
 
 <body>
+    @{
+        var controllerName = ViewContext.RouteData.Values["Controller"]?.ToString();
+    }
 
-    @if (ViewContext.RouteData.Values["Controller"]?.ToString() != "Account")
+    @if (controllerName != "Account")
     {
         @await Component.InvokeAsync("SiteHeader")
     }
 
     @RenderBody()
 
-    @if (ViewContext.RouteData.Values["Controller"]?.ToString() != "Account")
+    @if (controllerName != "Account")
     {
         @await Component.InvokeAsync("SiteFooter")
+        @await Component.InvokeAsync("HomeCartSection")
         <partial name="_SiteMobileMenu" />
     }
 
     <partial name="_SiteFooterRef" />
-
     @RenderSection("_SiteFooterSection", required: false)
-
 </body>
 </html>

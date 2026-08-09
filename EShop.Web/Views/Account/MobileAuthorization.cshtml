@@ -5,88 +5,58 @@
     Layout = "_SiteLayout";
 }
 
-<style>
-    .timer-wrap {
-        margin-top: 16px;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center; /* برای وسط‌چین شدن نوار کوتاه */
-    }
-
-    .progress-line {
-        width: 100%;
-        max-width: 180px; /* طول نوار */
-        height: 3px;
-        background: #e9ecef;
-        border-radius: 999px;
-        overflow: hidden;
-        margin-bottom: 8px;
-    }
-
-        .progress-line span {
-            display: block;
-            height: 100%;
-            width: 100%;
-            background: #666;
-            transition: width 1s linear;
-        }
-
-    #otpTimer {
-        font-size: 14px;
-        color: #444;
-        font-weight: bold;
-        margin-bottom: 5px;
-    }
-
-    #resendCode {
-        display: none;
-        text-decoration: none;
-        font-weight: 600;
-        color: #b88952;
-        font-size: 14px;
-    }
-</style>
-
 <div class="account-page">
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-5 col-md-7">
-                <div class="card shadow">
-                    <div class="card-body">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4 p-md-5">
+
                         <div class="text-center mb-4">
-                            <div style="font-size:55px;">🕯️</div>
-                            <h2 class="fw-bold mt-2">تایید شماره موبایل</h2>
+                            <div style="font-size:55px; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));">🕯️</div>
+                            <h2 class="fw-bold mt-3">@ViewData["Title"]</h2>
                             <p class="text-muted mb-1">کد ارسال شده به شماره موبایل را وارد کنید.</p>
-                            <small class="text-muted">@Model?.Mobile</small>
+                            <small class="text-secondary fw-bold">@Model?.Mobile</small>
                         </div>
 
-                        <form asp-controller="Account" asp-action="MobileAuthorization" method="post">
+                        <form asp-controller="Account" asp-action="MobileAuthorization" method="post" id="otpForm">
                             @Html.AntiForgeryToken()
                             <input asp-for="Mobile" type="hidden" />
                             <input asp-for="ReturnUrl" type="hidden" />
                             <input asp-for="Token" type="hidden" />
+                            <input type="hidden" asp-for="ActivationCode" id="hiddenActivationCode" />
 
-                            <div class="mb-3">
-                                <label asp-for="ActivationCode" class="form-label">کد تایید</label>
-                                <input asp-for="ActivationCode" class="form-control text-center" placeholder="12345" autocomplete="one-time-code" />
+                            <div class="otp-inputs">
+                                <input type="number" class="otp-field" maxlength="1" inputmode="numeric">
+                                <input type="number" class="otp-field" maxlength="1" inputmode="numeric">
+                                <input type="number" class="otp-field" maxlength="1" inputmode="numeric">
+                                <input type="number" class="otp-field" maxlength="1" inputmode="numeric">
+                                <input type="number" class="otp-field" maxlength="1" inputmode="numeric">
+                            </div>
+
+                            <div class="text-center mb-3">
                                 <span asp-validation-for="ActivationCode" class="text-danger small"></span>
                             </div>
 
                             <div class="timer-wrap">
-                                <div class="progress-line">
-                                    <span id="progressBar"></span>
-                                </div>
                                 <div id="otpTimer"></div>
-                                <a href="#" id="resendCode">ارسال مجدد کد</a>
+                                <a asp-action="ResendVerificationCode"
+                                   asp-route-mobileNumber="@Model?.Mobile"
+                                   asp-route-returnUrl="@Model?.ReturnUrl"
+                                   id="resendCode">ارسال مجدد کد</a>
                             </div>
 
-                            <button type="submit" class="btn btn-dark w-100 mt-3">تایید و ورود</button>
+                            <button type="submit" class="btn btn-dark w-100 py-3 fw-bold shadow-sm" style="border-radius: 12px;">
+                                تایید و ورود
+                            </button>
                         </form>
 
                         <div class="text-center mt-4">
-                            <a asp-action="RegisterOrLogin" class="text-decoration-none small">تغییر شماره موبایل</a>
+                            <a asp-action="RegisterOrLogin" class="text-decoration-none small text-muted">
+                                <i class="fa fa-edit me-1"></i> تغییر شماره موبایل
+                            </a>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -100,32 +70,67 @@
     <script>
         window.onload = function () {
             startOtpTimer();
+            setupOtpLogic();
         };
 
         function startOtpTimer() {
-            let totalTime = 60;
-            let timeLeft = totalTime;
+            let timeLeft = 60;
             const timer = document.getElementById("otpTimer");
-            const progressBar = document.getElementById("progressBar");
             const resendCode = document.getElementById("resendCode");
-            const progressContainer = document.querySelector(".progress-line");
 
             const interval = setInterval(function () {
                 let minutes = Math.floor(timeLeft / 60);
                 let seconds = timeLeft % 60;
 
-                timer.innerText = "00:" + String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
-                progressBar.style.width = (timeLeft / totalTime * 100) + "%";
+                timer.innerText = String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0");
 
                 if (timeLeft <= 0) {
                     clearInterval(interval);
                     timer.style.display = "none";
-                    progressContainer.style.display = "none";
                     resendCode.style.display = "inline-block";
                 }
                 timeLeft--;
             }, 1000);
         }
+
+        function setupOtpLogic() {
+            const inputs = document.querySelectorAll('.otp-field');
+            const hiddenInput = document.getElementById('hiddenActivationCode');
+
+            inputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    if (e.target.value.length > 1) {
+                        e.target.value = e.target.value.slice(0, 1);
+                    }
+                    if (e.target.value && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+                    updateHiddenValue();
+                });
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !input.value && index > 0) {
+                        inputs[index - 1].focus();
+                    }
+                });
+
+                input.addEventListener('paste', (e) => {
+                    const data = e.clipboardData.getData('text').trim();
+                    if (data.length === inputs.length) {
+                        for (let i = 0; i < inputs.length; i++) {
+                            inputs[i].value = data[i];
+                        }
+                        updateHiddenValue();
+                        inputs[inputs.length - 1].focus();
+                    }
+                    e.preventDefault();
+                });
+            });
+
+            function updateHiddenValue() {
+                let fullCode = "";
+                inputs.forEach(input => fullCode += input.value);
+                hiddenInput.value = fullCode;
+            }
+        }
     </script>
 }
-

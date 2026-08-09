@@ -622,3 +622,70 @@ img {
         .account-page .btn-dark:hover {
             background: #5b4334;
         }
+
+ /*============== Mobile Authorization / OTP ==============*/
+
+
+    .account-page .otp-inputs {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        direction: ltr;
+        margin: 25px 0;
+    }
+
+    .account-page .otp-field {
+        width: 50px;
+        height: 60px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        border: 1.5px solid #eee;
+        border-radius: 12px;
+        background-color: #f9f9f9;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .account-page .otp-field:focus {
+            border-color: #b88952;
+            outline: none;
+            box-shadow: 0 0 8px rgba(184, 137, 82, 0.2);
+            background-color: #fff;
+        }
+
+        .account-page .otp-field::-webkit-inner-spin-button,
+        .account-page .otp-field::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+    .account-page .timer-wrap {
+        margin-bottom: 20px;
+        text-align: center;
+        min-height: 25px;
+    }
+
+    .account-page #otpTimer {
+        font-size: 15px;
+        color: #555;
+        font-weight: 500;
+        letter-spacing: 1px;
+    }
+
+    .account-page #resendCode {
+        display: none;
+        text-decoration: none;
+        font-weight: 600;
+        color: #b88952;
+        font-size: 14px;
+        transition: color 0.2s;
+    }
+
+        .account-page #resendCode:hover {
+            color: #8e683e;
+        }
+
+    .account-page .card {
+        border: none;
+        border-radius: 20px;
+    }

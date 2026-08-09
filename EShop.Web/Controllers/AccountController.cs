@@ -32,16 +32,21 @@ namespace EShop.Web.Controllers
         public async Task<IActionResult> RegisterOrLogin(RegisterUserDTO dto)
         {
             await _userService.RegisterOrLoginUser(dto);
-            return RedirectToAction("MobileAuthorization" , new { rerutnUrl = dto.ReturnUrl });
+            return RedirectToAction("MobileAuthorization", new { mobile = dto.MobileNumber, returnUrl = dto.ReturnUrl });
         }
         #endregion
 
         #region MobileAuthorization
         [HttpGet("authorization")]
-        public async Task<IActionResult> MobileAuthorization(string? returnUrl = null)
+        public IActionResult MobileAuthorization(string mobile, string? returnUrl = null)
         {
-            ViewData["ReturnUrl"] = returnUrl;
-            return View();
+            var dto = new MobileActivationDTO
+            {
+                Mobile = mobile,
+                ReturnUrl = returnUrl
+            };
+
+            return View(dto);
         }
 
         [HttpPost("authorization"), ValidateAntiForgeryToken]
@@ -69,11 +74,11 @@ namespace EShop.Web.Controllers
 
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name , user.MobileNumber),
-                    new Claim(ClaimTypes.NameIdentifier , user.Id.ToString())
+                    new Claim(ClaimTypes.Name, user.MobileNumber),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
                 };
 
-                var identity = new ClaimsIdentity(claims , CookieAuthenticationDefaults.AuthenticationScheme);
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var principal = new ClaimsPrincipal(identity);
                 var properties = new AuthenticationProperties
                 {
@@ -89,7 +94,7 @@ namespace EShop.Web.Controllers
                 }
                 else
                 {
-                    return RedirectToAction("Index" , "Home");
+                    return RedirectToAction("Index", "Home");
                 }
             }
 
@@ -99,10 +104,20 @@ namespace EShop.Web.Controllers
         #endregion
 
         #region Resend Verification Code
-        public async Task<IActionResult> ResendVerificationCode(string mobileNumber)
+        public async Task<IActionResult> ResendVerificationCode(string mobileNumber, string? returnUrl = null)
         {
-            await _userService.SendActivationSms(mobileNumber);
-            return RedirectToAction("MobileAuthorization");
+            var result = await _userService.SendActivationSms(mobileNumber);
+
+            if (!result)
+            {
+                TempData[ErrorMessage] = "کاربری یافت نشد";
+            }
+
+            return RedirectToAction(nameof(MobileAuthorization), new
+            {
+                mobile = mobileNumber,
+                returnUrl = returnUrl
+            });
         }
         #endregion
 

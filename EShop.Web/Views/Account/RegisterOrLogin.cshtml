@@ -1,4 +1,5 @@
 ﻿@model EShop.Data.DTOs.Account.RegisterUserDTO
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 
 @{
     ViewData["Title"] = "ورود / ثبت نام";
@@ -6,22 +7,14 @@
 }
 
 <div class="account-page">
-
     <div class="container">
-
         <div class="row justify-content-center">
-
             <div class="col-lg-5 col-md-8">
-
                 <div class="card shadow">
-
                     <div class="card-body">
 
                         <div class="text-center mb-4">
-
-                            <div style="font-size:55px;">
-                                🕯️
-                            </div>
+                            <div style="font-size:55px;">🕯️</div>
 
                             <h2 class="fw-bold mt-2">
                                 Lumi Candle
@@ -34,19 +27,15 @@
                             <small class="text-muted">
                                 برای ادامه خرید شماره موبایل خود را وارد کنید
                             </small>
-
                         </div>
 
-                        <form asp-controller="Account"
-                              asp-action="RegisterOrLogin"
-                              method="post">
-
+                        <form asp-controller="Account" asp-action="RegisterOrLogin" method="post">
                             @Html.AntiForgeryToken()
 
+                            <input asp-for="Token" type="hidden" id="captchaInput" />
                             <input asp-for="ReturnUrl" type="hidden" />
 
                             <div class="mb-3">
-
                                 <label asp-for="MobileNumber" class="form-label">
                                     شماره موبایل
                                 </label>
@@ -56,28 +45,31 @@
                                        placeholder="09xxxxxxxxx" />
 
                                 <span asp-validation-for="MobileNumber" class="text-danger"></span>
-
                             </div>
 
                             <button type="submit" class="btn btn-dark w-100">
                                 ادامه
                             </button>
-
                         </form>
 
                     </div>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
 </div>
 
 @section _SiteFooterSection
 {
     <partial name="_ValidationScriptsPartial" />
+
+    <script src="https://www.google.com/recaptcha/api.js?render=@Configuration["googleReCaptcha:SiteKey"]"></script>
+    <script>
+        grecaptcha.ready(function () {
+        grecaptcha.execute('@Configuration["googleReCaptcha:SiteKey"]', { action: 'register_or_login' })
+        .then(function (token) {
+        document.getElementById("captchaInput").value = token;
+        });
+        });
+    </script>
 }

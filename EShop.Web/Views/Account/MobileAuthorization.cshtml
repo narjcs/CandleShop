@@ -1,4 +1,5 @@
 ﻿@model EShop.Data.DTOs.Account.MobileActivationDTO
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 
 @{
     ViewData["Title"] = "تایید شماره موبایل";
@@ -23,7 +24,7 @@
                             @Html.AntiForgeryToken()
                             <input asp-for="Mobile" type="hidden" />
                             <input asp-for="ReturnUrl" type="hidden" />
-                            <input asp-for="Token" type="hidden" />
+                            <input asp-for="Token" type="hidden" id="captchaInput" />
                             <input type="hidden" asp-for="ActivationCode" id="hiddenActivationCode" />
 
                             <div class="otp-inputs">
@@ -132,5 +133,14 @@
                 hiddenInput.value = fullCode;
             }
         }
+    </script>
+    <script src="https://www.google.com/recaptcha/api.js?render=@Configuration["googleReCaptcha:SiteKey"]"></script>
+    <script>
+        grecaptcha.ready(function () {
+        grecaptcha.execute('@Configuration["googleReCaptcha:SiteKey"]', { action: 'register_or_login' })
+        .then(function (token) {
+        document.getElementById("captchaInput").value = token;
+        });
+        });
     </script>
 }

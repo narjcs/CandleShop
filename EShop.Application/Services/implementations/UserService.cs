@@ -106,6 +106,7 @@ namespace EShop.Application.Services.Implementations
             if (user == null) return false;
 
             user.MobileActivationNumber = new Random().Next(10000, 99999).ToString();
+            await _userRepository.SaveAsync();
             await _smsService.SendVerificationSms(mobile, user.MobileActivationNumber);
             return true;
         }

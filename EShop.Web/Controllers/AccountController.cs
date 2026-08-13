@@ -100,10 +100,7 @@ namespace EShop.Web.Controllers
                 {
                     return Redirect(dto.ReturnUrl);
                 }
-                else
-                {
-                    return RedirectToAction("Index", "Home");
-                }
+                return RedirectToAction("Index", "Home");
             }
 
             TempData[ErrorMessage] = "لطفا خطاهای زیر را رفع کنید.";

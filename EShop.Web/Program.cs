@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using GoogleReCaptcha.V3.Interface;
 using GoogleReCaptcha.V3;
 using EShop.Application.Services.implementations;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
 
 namespace EShop.Web
 {
@@ -50,6 +52,10 @@ namespace EShop.Web
                 options.ExpireTimeSpan = TimeSpan.FromDays(7);
                 options.SlidingExpiration = true;
             });
+
+            //Encoder
+            builder.Services.AddSingleton<HtmlEncoder>(HtmlEncoder
+                .Create(allowedRanges: new[] { UnicodeRanges.BasicLatin, UnicodeRanges.Arabic }));
 
             builder.Services.AddControllersWithViews();
 

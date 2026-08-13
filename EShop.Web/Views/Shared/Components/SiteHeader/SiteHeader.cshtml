@@ -53,12 +53,20 @@
 
                 <a href="#"><i class="fa-solid fa-cart-shopping"></i></a>
 
-                <a asp-controller="Account"
-                   asp-action="RegisterOrLogin">
-
-                    <i class="fa-regular fa-user"></i>
-
-                </a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller=""
+                       asp-action="Profile">
+                        <i class="fa-regular fa-user"></i>
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="Account"
+                       asp-action="RegisterOrLogin">
+                        <i class="fa-regular fa-user"></i>
+                    </a>
+                }
 
             </div>
 

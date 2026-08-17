@@ -1,10 +1,10 @@
 ﻿namespace EShop.Data.Entities.ProductEntities
 {
-    public class ProductGallery
+    public class Gallery
     {
-
-        public long ProductId { get; set; }
+        public long CandleId { get; set; }
         public string ImageName { get; set; }
         public int Order { get; set; }
+        public Candle Candle { get; set; }
     }
 }

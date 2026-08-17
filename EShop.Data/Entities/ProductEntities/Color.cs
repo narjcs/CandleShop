@@ -2,10 +2,9 @@
 
 namespace EShop.Data.Entities.ProductEntities
 {
-    public class ProductCategory : BaseEntity
+    public class Color : BaseEntity
     {
         public string Title { get; set; }
-        public string Url { get; set; }
-        public bool IsActive { get; set; }
+        public ICollection<CandleDetail> CandleDetails { get; set; }
     }
 }

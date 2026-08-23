@@ -4,7 +4,7 @@ using EShop.Data.DTOs.CandleCategory;
 using EShop.Data.Entities.Candle;
 using EShop.Data.Repository;
 
-namespace EShop.Application.Services.implementations
+namespace EShop.Application.Services.Implementations
 {
     public class CandleService : ICandleService
     {

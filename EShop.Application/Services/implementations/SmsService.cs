@@ -5,7 +5,7 @@ using System.ClientModel.Primitives;
 using System.Collections.Generic;
 using System.Text;
 
-namespace EShop.Application.Services.implementations
+namespace EShop.Application.Services.Implementations
 {
     public class SmsService : ISmsService
     {

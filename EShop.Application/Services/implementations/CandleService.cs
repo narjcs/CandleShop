@@ -103,5 +103,112 @@ namespace EShop.Application.Services.Implementations
             throw new NotImplementedException();
         }
         #endregion
+
+        #region CandleDetail
+        public Task CreateCandleDetail(CreateCandleDetailDTO dto)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<EditCandleDetailDTO> GetEditCandleDetail(long detailId)
+        {
+            throw new NotImplementedException();
+        }
+        public Task EditCandleDetail(EditCandleDetailDTO dto)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<bool> DeleteCandleDetail(long detailId)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+
+        #region Color
+        public Task<FilterColorDTO> FilterColor(FilterColorDTO filter)
+        {
+            throw new NotImplementedException();
+        }
+        public Task CreateColor(CreateColorDTO dto)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<EditColorDTO> GetEditColor(long colorId)
+        {
+            throw new NotImplementedException();
+        }
+        public Task EditColor(EditColorDTO dto)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<bool> DeleteColor(long colorId)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+
+        #region Size
+        public Task<FilterSizeDTO> FilterSize(FilterSizeDTO filter)
+        {
+            throw new NotImplementedException();
+        }
+        public Task CreateSize(CreateSizeDTO dto)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<EditSizeDTO> GetEditSize(long sizeId)
+        {
+            throw new NotImplementedException();
+        }
+        public Task EditSize(EditSizeDTO dto)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<bool> DeleteSize(long sizeId)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+
+        #region Scent
+        public Task<FilterScentDTO> FilterScent(FilterScentDTO filter)
+        {
+            throw new NotImplementedException();
+        }
+        public Task CreateScent(CreateScentDTO dto)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<EditScentDTO> GetEditScent(long scentId)
+        {
+            throw new NotImplementedException();
+        }
+        public Task EditScent(EditScentDTO dto)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<bool> DeleteScent(long scentId)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+
+        #region Gallery
+        public Task CreateGallery(CreateGalleryDTO dto)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<EditGalleryDTO> GetEditGallery(long galleryId)
+        {
+            throw new NotImplementedException();
+        }
+        public Task EditGallery(EditGalleryDTO dto)
+        {
+            throw new NotImplementedException();
+        }
+        public Task<bool> DeleteGallery(long galleryId)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
     }
 }

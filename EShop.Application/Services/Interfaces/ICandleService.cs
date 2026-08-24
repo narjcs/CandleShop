@@ -8,9 +8,9 @@ namespace EShop.Application.Services.Interfaces
         #region Candle
         Task<FilterCandleDTO> FilterCandle(FilterCandleDTO filter);
         Task<CandleDetailDTO> CandleDetail(long candleId);
-        Task<CreateCandleDTO> CreateCandle(CreateCandleDTO dto);
+        Task<CreateCandleResult> CreateCandle(CreateCandleDTO dto);
         Task<EditCandleDTO> GetEditCandle(long candleId); // First we fill an EditProductDTO then we send it to Admin
-        Task EditProduct(EditCandleDTO dto); //Admin update or change any essential part
+        Task<EditCandleResult> EditCandle(EditCandleDTO dto); //Admin update or change any essential part
         Task<bool> DeleteCandle(long candleId);
         #endregion
 

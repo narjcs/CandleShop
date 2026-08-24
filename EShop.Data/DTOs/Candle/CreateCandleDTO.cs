@@ -18,7 +18,7 @@ namespace EShop.Data.DTOs.Candle
     {
         Success,
         Error,
-        FileNotImage,
+        SavingMainImageFailed,
         CategoryNotFound
     }
 }

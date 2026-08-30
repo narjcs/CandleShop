@@ -62,7 +62,7 @@ namespace EShop.Application.Services.Implementations
 
             #region Main Image
             var mainImageName = Guid.NewGuid().ToString("N") + Path.GetExtension(dto.MainImage.FileName);
-            var result = dto.MainImage.AddImageToServer(mainImageName, PathExtension.CandleImageServer, 
+            var result = dto.MainImage.AddImageToServer(mainImageName, PathExtension.CandleImageServer,
                                                        150, 150, PathExtension.CandleImageThumbServer);
             if (result) candle.MainImageName = mainImageName;
             else return CreateCandleResult.SavingMainImageFailed;
@@ -70,6 +70,50 @@ namespace EShop.Application.Services.Implementations
 
             await _candleRepository.AddEntity(candle);
             await _candleRepository.SaveAsync();
+
+            #region Categories
+            foreach (var category in dto.Categories)
+            {
+                var selectedCategory = await _categoryRepository.GetQuery().FirstOrDefaultAsync(d => d.Id == category);
+                if (selectedCategory == null) return CreateCandleResult.CategoryNotFound;
+
+                var selected = new SelectedCategory
+                {
+                    Candle = candle,
+                    Category = selectedCategory,
+                    CandleId = candle.Id,
+                    CategoryId = category
+                };
+                await _selectedCategoryRepository.AddEntity(selected);
+            }
+            await _selectedCategoryRepository.SaveAsync();
+            #endregion
+
+            #region Galleries
+            if (dto.CandleGalleries != null && dto.CandleGalleries.Any())
+            {
+                var galleryOrder = 2;
+                foreach (var item in dto.CandleGalleries)
+                {
+                    var galleryItem = new Gallery
+                    {
+                        CandleId = candle.Id,
+                        Order = galleryOrder,
+                    };
+
+                    //Image
+                    var galleryImageName = Guid.NewGuid().ToString("N") + Path.GetExtension(item.FileName);
+                    item.AddImageToServer(galleryImageName, PathExtension.CandleGalleryServer,150, 150, PathExtension.CandleGalleryThumbServer);
+                    galleryItem.ImageName = galleryImageName;
+
+                    await _galleryRepository.AddEntity(galleryItem);
+
+                    galleryOrder++;
+                }
+            }
+            await _galleryRepository.SaveAsync();
+            #endregion
+
             return CreateCandleResult.Success;
         }
         public async Task<CandleDetailDTO> CandleDetail(long candleId)
@@ -112,9 +156,20 @@ namespace EShop.Application.Services.Implementations
         {
             throw new NotImplementedException();
         }
-        public Task<EditCandleDTO> GetEditCandle(long candleId)
+        public async Task<EditCandleDTO> GetEditCandle(long candleId)
         {
-            throw new NotImplementedException();
+            var data = await _candleRepository.GetEntityById(candleId);
+            var model = new EditCandleDTO
+            {
+                CandleId = candleId,
+                Title = data.Title,
+                IsAvailable = data.IsAvailable,
+                ShortDescription = data.ShortDescription,
+                Description = data.Description,
+                Categories = await _selectedCategoryRepository.GetQuery().Where(d => d.CandleId == candleId)
+                            .Select(d => d.CategoryId).ToListAsync(),
+            };
+            return model;
         }
         public Task<bool> DeleteCandle(long candleId)
         {

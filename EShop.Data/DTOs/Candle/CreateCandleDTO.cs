@@ -11,7 +11,7 @@ namespace EShop.Data.DTOs.Candle
         public string ShortDescription { get; set; }
         public string Description { get; set; }
         public List<long> Categories { get; set; }
-        public List<IFormFile> CandleGalleries { get; set; }
+        public List<IFormFile>? CandleGalleries { get; set; }
     }
 
     public enum CreateCandleResult

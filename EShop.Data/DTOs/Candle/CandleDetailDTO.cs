@@ -1,4 +1,4 @@
-﻿using EShop.Data.Entities.Candle;
+﻿using EShop.Data.Entities.CandleEntities;
 
 namespace EShop.Data.DTOs.Candle
 {

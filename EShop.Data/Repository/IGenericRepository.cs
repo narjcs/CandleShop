@@ -1,4 +1,5 @@
 ﻿using EShop.Data.Entities.Common;
+using System.Security.Cryptography;
 
 namespace EShop.Data.Repository
 {
@@ -10,7 +11,8 @@ namespace EShop.Data.Repository
         Task AddRangeEntities (List<TEntity> entities);
         void EditEntity (TEntity entity);
         void DeleteEntity (TEntity entity);     //Soft Delete, IsDelete = true
-        void DeleteRangeEntities (List<TEntity> entities);
+        void DeleteEntities (List<TEntity> entities);
+        void DeletePermanentEntities(List<TEntity> entities);
         void DeletePermanent (TEntity entity);  //Hard Delete
         Task SaveAsync();
 

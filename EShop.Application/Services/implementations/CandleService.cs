@@ -3,9 +3,10 @@ using EShop.Application.Utils;
 using EShop.Application.Services.Interfaces;
 using EShop.Data.DTOs.Candle;
 using EShop.Data.DTOs.CandleCategory;
-using EShop.Data.Entities.Candle;
+using EShop.Data.Entities.CandleEntities;
 using EShop.Data.Repository;
 using Microsoft.EntityFrameworkCore;
+using EShop.Data.Entities.OrderEntities;
 
 namespace EShop.Application.Services.Implementations
 {
@@ -20,11 +21,14 @@ namespace EShop.Application.Services.Implementations
         private readonly IGenericRepository<CandleDetail> _candleDetailRepository;
         private readonly IGenericRepository<SelectedCategory> _selectedCategoryRepository;
         private readonly IGenericRepository<Gallery> _galleryRepository;
+        private readonly IGenericRepository<OrderDetail> _orderDetailRepository;
+
 
         public CandleService(IGenericRepository<Candle> candleRepository, IGenericRepository<Category> categoryRepository,
                              IGenericRepository<Color> colorRepository, IGenericRepository<Scent> scentRepository,
                              IGenericRepository<Size> sizeRepository, IGenericRepository<CandleDetail> candleDetailRepository,
-                             IGenericRepository<SelectedCategory> selectedCategoryRepository, IGenericRepository<Gallery> galleryRepository)
+                             IGenericRepository<SelectedCategory> selectedCategoryRepository, IGenericRepository<Gallery> galleryRepository,
+                             IGenericRepository<OrderDetail> orderDetailRepository)
         {
             _candleRepository = candleRepository;
             _categoryRepository = categoryRepository;
@@ -34,6 +38,7 @@ namespace EShop.Application.Services.Implementations
             _candleDetailRepository = candleDetailRepository;
             _selectedCategoryRepository = selectedCategoryRepository;
             _galleryRepository = galleryRepository;
+            _orderDetailRepository = orderDetailRepository;
         }
 
         public async ValueTask DisposeAsync()
@@ -46,6 +51,7 @@ namespace EShop.Application.Services.Implementations
             await _candleDetailRepository.DisposeAsync();
             await _selectedCategoryRepository.DisposeAsync();
             await _galleryRepository.DisposeAsync();
+            await _orderDetailRepository.DisposeAsync();
         }
         #endregion
 
@@ -71,22 +77,9 @@ namespace EShop.Application.Services.Implementations
             await _candleRepository.AddEntity(candle);
             await _candleRepository.SaveAsync();
 
-            #region Categories
-            foreach (var category in dto.Categories)
-            {
-                var selectedCategory = await _categoryRepository.GetQuery().FirstOrDefaultAsync(d => d.Id == category);
-                if (selectedCategory == null) return CreateCandleResult.CategoryNotFound;
-
-                var selected = new SelectedCategory
-                {
-                    Candle = candle,
-                    Category = selectedCategory,
-                    CandleId = candle.Id,
-                    CategoryId = category
-                };
-                await _selectedCategoryRepository.AddEntity(selected);
-            }
-            await _selectedCategoryRepository.SaveAsync();
+            #region Category
+            var AddCategoriesResult = await AddCandleSelectedCategories(dto.Categories, candle.Id);
+            if (!AddCategoriesResult) return CreateCandleResult.CategoryNotFound;
             #endregion
 
             #region Galleries
@@ -147,10 +140,37 @@ namespace EShop.Application.Services.Implementations
 
             };
         }
-
-        public Task<EditCandleResult> EditCandle(EditCandleDTO dto)
+        public async Task<EditCandleResult> EditCandle(EditCandleDTO dto)
         {
-            throw new NotImplementedException();
+            var candle = await _candleRepository.GetQuery().FirstOrDefaultAsync(d => d.Id == dto.CandleId);
+            if (candle == null) return EditCandleResult.Error;
+            
+            candle.Title = dto.Title;
+            candle.IsAvailable = dto.IsAvailable;
+            candle.ShortDescription = dto.ShortDescription;
+            candle.Description = dto.Description;
+
+            #region Category
+            await RemoveCandleSelectedCategories(dto.CandleId);
+            var AddCategoriesResult = await AddCandleSelectedCategories(dto.Categories , dto.CandleId);
+            if (!AddCategoriesResult) return EditCandleResult.CategoryNotFound;
+            #endregion
+
+            #region Main Image
+            if (dto.MainImage != null)
+            {
+                var mainImageName = Guid.NewGuid().ToString("N") + Path.GetExtension(dto.MainImage.FileName);
+                var result = dto.MainImage.AddImageToServer(mainImageName, PathExtension.CandleImageServer,
+                                                           150, 150, PathExtension.CandleImageThumbServer,
+                                                           candle.MainImageName);
+                if (result) candle.MainImageName = mainImageName;
+                else return EditCandleResult.ImageNotSaved;
+            }
+            #endregion
+
+            _candleRepository.EditEntity(candle);
+            await _candleRepository.SaveAsync();
+            return EditCandleResult.Success;
         }
         public Task<FilterCandleDTO> FilterCandle(FilterCandleDTO filter)
         {
@@ -171,40 +191,126 @@ namespace EShop.Application.Services.Implementations
             };
             return model;
         }
-        public Task<bool> DeleteCandle(long candleId)
+        public async Task<bool> DeleteCandle(long candleId)
         {
-            throw new NotImplementedException();
+            #region Check Order
+            var candleOrdered = await _orderDetailRepository.GetQuery().AnyAsync(d => d.CandleId == candleId);
+            if (candleOrdered) return false;
+            #endregion
+
+            #region Categories
+            var categories = await _selectedCategoryRepository.GetQuery().Where(d => d.CandleId == candleId).ToListAsync();
+            _selectedCategoryRepository.DeletePermanentEntities(categories);
+            await _selectedCategoryRepository.SaveAsync();
+            #endregion
+
+            #region Galleries
+            var galleries = await _galleryRepository.GetQuery().Where(d => d.CandleId == candleId).ToListAsync();
+            if (galleries.Any())
+            {
+                foreach (var item in galleries)
+                {
+                    item.ImageName.DeleteImage(PathExtension.CandleGalleryImage, PathExtension.CandleGalleryThumb);
+                }
+                _galleryRepository.DeletePermanentEntities(galleries);
+                await _galleryRepository.SaveAsync();
+            }
+            #endregion
+
+            var candle = await _candleRepository.GetEntityById(candleId);
+            _candleRepository.DeleteEntity(candle);
+            await _candleRepository.SaveAsync();
+            return true;
         }
         #endregion
 
         #region Category
-        public Task CreateCategory(CreateCategoryDTO dto)
+        public async Task<bool> CreateCategory(CreateCategoryDTO dto)
         {
-            throw new NotImplementedException();
+            #region Check Url
+            var urlInUse = await _categoryRepository.GetQuery().AnyAsync(c => c.Url ==  dto.Url);
+            if (urlInUse) return false;
+            #endregion
+
+            var category = new Category
+            {
+                Title = dto.Title,
+                Url = dto.Url,
+                IsActive = true,
+                Order = dto.Order
+            };
+            await _categoryRepository.AddEntity(category);
+            await _categoryRepository.SaveAsync();
+            return true;
         }
-        public Task EditCategory(EditCategoryDTO dto)
+        public async Task<bool> EditCategory(EditCategoryDTO dto)
         {
-            throw new NotImplementedException();
+            #region Check Url
+            var urlInUse = await _categoryRepository.GetQuery().AnyAsync(c => c.Url == dto.Url);
+            if (urlInUse) return false;
+            #endregion
+
+            var data = await _categoryRepository.GetEntityById(dto.CategoryId);
+            data.Title = dto.Title;
+            data.Url = dto.Url;
+            data.IsActive = dto.IsActive;
+            data.Order = dto.Order;
+
+            _categoryRepository.EditEntity(data);
+            await _categoryRepository.SaveAsync();
+            return true;
         }
         public Task<FilterCategoryDTO> FilterCategory(FilterCategoryDTO filter)
         {
             throw new NotImplementedException();
         }
-        public Task<EditCategoryDTO> GetEditCategory(long categortId)
+        public async Task<EditCategoryDTO> GetEditCategory(long categortId)
         {
-            throw new NotImplementedException();
+            var data = await _categoryRepository.GetEntityById(categortId);
+            return new EditCategoryDTO
+            {
+                Title = data.Title,
+                Url = data.Url,
+                IsActive = data.IsActive,
+                Order = data.Order
+            };
         }
-        public Task<bool> DeleteCategory(long categoryId)
+        public async Task<bool> DeleteCategory(long categoryId)
         {
-            throw new NotImplementedException();
+            #region Check Category
+            var categoryInUse = await _selectedCategoryRepository.GetQuery().AnyAsync(c => c.CategoryId == categoryId);
+            if (categoryInUse) return false;
+            #endregion
+
+            var data = await _categoryRepository.GetEntityById(categoryId);
+            _categoryRepository.DeleteEntity(data);
+            await _categoryRepository.SaveAsync();
+            return true;
         }
-        public Task AddCandleSelectedCategories(List<long> selectedCategories, long candleId)
+        public async Task<bool> AddCandleSelectedCategories(List<long> selectedCategories, long candleId)
         {
-            throw new NotImplementedException();
+            foreach (var category in selectedCategories)
+            {
+                var selectedCategory = await _categoryRepository.GetQuery().FirstOrDefaultAsync(d => d.Id == category);
+                if (selectedCategory == null) return false;
+
+                var selected = new SelectedCategory
+                {
+                    Candle = await _candleRepository.GetEntityById(candleId),
+                    Category = selectedCategory,
+                    CandleId = candleId,
+                    CategoryId = category
+                };
+                await _selectedCategoryRepository.AddEntity(selected);
+            }
+            await _selectedCategoryRepository.SaveAsync();
+            return true;
         }
-        public Task RemoveCandleSelectedCategories(long candleId)
+        public async Task RemoveCandleSelectedCategories(long candleId)
         {
-            throw new NotImplementedException();
+            var selectedCategories = await _selectedCategoryRepository.GetQuery().Where(d => d.CandleId == candleId).ToListAsync();
+            _selectedCategoryRepository.DeletePermanentEntities(selectedCategories);
+            await _selectedCategoryRepository.SaveAsync();
         }
         #endregion
 

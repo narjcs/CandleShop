@@ -15,10 +15,10 @@ namespace EShop.Application.Services.Interfaces
         #endregion
 
         #region Categories
-        Task AddCandleSelectedCategories(List<long> selectedCategories, long candleId);
+        Task<bool> AddCandleSelectedCategories(List<long> selectedCategories, long candleId);
         Task RemoveCandleSelectedCategories(long candleId);
-        Task CreateCategory(CreateCategoryDTO dto);
-        Task EditCategory(EditCategoryDTO dto);
+        Task<bool> CreateCategory(CreateCategoryDTO dto);
+        Task<bool> EditCategory(EditCategoryDTO dto);
         Task<EditCategoryDTO> GetEditCategory(long categortId);
         Task<FilterCategoryDTO> FilterCategory(FilterCategoryDTO filter);
         Task<bool> DeleteCategory(long categoryId);

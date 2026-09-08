@@ -1,7 +1,6 @@
 ﻿using EShop.Data.Entities.Common;
 
-namespace EShop.Data.Entities.Candle;
-
+namespace EShop.Data.Entities.CandleEntities;
 public class Candle : BaseEntity
 {
     #region Properties

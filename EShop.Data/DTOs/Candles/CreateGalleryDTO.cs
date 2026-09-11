@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace EShop.Data.DTOs.Candle
+namespace EShop.Data.DTOs.Candles
 {
     public class CreateGalleryDTO
     {

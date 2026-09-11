@@ -1,7 +1,7 @@
 ﻿using EShop.Application.Extensions;
 using EShop.Application.Utils;
 using EShop.Application.Services.Interfaces;
-using EShop.Data.DTOs.Candle;
+using EShop.Data.DTOs.Candles;
 using EShop.Data.DTOs.CandleCategory;
 using EShop.Data.Entities.CandleEntities;
 using EShop.Data.Repository;

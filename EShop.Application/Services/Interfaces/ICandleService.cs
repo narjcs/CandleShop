@@ -1,4 +1,4 @@
-﻿using EShop.Data.DTOs.Candle;
+﻿using EShop.Data.DTOs.Candles;
 using EShop.Data.DTOs.CandleCategory;
 
 namespace EShop.Application.Services.Interfaces

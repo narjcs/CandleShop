@@ -1,4 +1,4 @@
-﻿using Eshop.Data.DTOs.Paging;
+﻿using EShop.Data.DTOs.Paging;
 using EShop.Data.Entities.CandleEntities;
 using System.ComponentModel.DataAnnotations;
 
@@ -18,6 +18,26 @@ namespace EShop.Data.DTOs.Candles
         public FilterCandleStatus CandleStatus { get; set; }
         public FilterCandleOrder CandleOrder { get; set; }
         public List<Candle> Data { get; set; }
+
+        #region Methods
+        public FilterCandleDTO SetData(List<Candle> data)
+        {
+            Data = data;
+            return this;
+        }
+        public FilterCandleDTO SetPaging(BasePaging paging)
+        {
+            PageId = paging.PageId;
+            AllEntitiesCount = paging.AllEntitiesCount;
+            StartPage = paging.StartPage;
+            EndPage = paging.EndPage;
+            HowManyShowPageAfterAndBefore = paging.HowManyShowPageAfterAndBefore;
+            TakeEntity = paging.TakeEntity;
+            SkipEntity = paging.SkipEntity;
+            PageCount = paging.PageCount;
+            return this;
+        }
+        #endregion
     }
 
     public enum FilterCandleStatus

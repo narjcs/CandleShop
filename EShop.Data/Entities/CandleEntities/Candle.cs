@@ -5,6 +5,7 @@ public class Candle : BaseEntity
 {
     #region Properties
     public string Title { get; set; }
+    public int Price { get; set; }
     public bool IsAvailable { get; set; }
     public string MainImageName { get; set; }
     public string ShortDescription { get; set; }

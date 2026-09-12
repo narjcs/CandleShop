@@ -1,12 +1,13 @@
-﻿using EShop.Application.Extensions;
-using EShop.Application.Utils;
+﻿using EShop.Data.DTOs.Paging;
+using EShop.Application.Extensions;
 using EShop.Application.Services.Interfaces;
-using EShop.Data.DTOs.Candles;
+using EShop.Application.Utils;
 using EShop.Data.DTOs.CandleCategory;
+using EShop.Data.DTOs.Candles;
 using EShop.Data.Entities.CandleEntities;
+using EShop.Data.Entities.OrderEntities;
 using EShop.Data.Repository;
 using Microsoft.EntityFrameworkCore;
-using EShop.Data.Entities.OrderEntities;
 
 namespace EShop.Application.Services.Implementations
 {
@@ -172,9 +173,116 @@ namespace EShop.Application.Services.Implementations
             await _candleRepository.SaveAsync();
             return EditCandleResult.Success;
         }
-        public Task<FilterCandleDTO> FilterCandle(FilterCandleDTO filter)
+        public async Task<FilterCandleDTO> FilterCandle(FilterCandleDTO filter)
         {
-            throw new NotImplementedException();
+            #region Query
+            var query = _candleRepository.GetQuery().Include(d => d.CandleDetails)
+                .Include(d => d.SelectedCategories).ThenInclude(d => d.Category)
+                .AsQueryable();
+            #endregion
+
+            #region Switch
+            switch (filter.CandleOrder)
+            {
+                case FilterCandleOrder.Newest:
+                    query = query.OrderByDescending(d => d.CreateDate);
+                    break;
+                case FilterCandleOrder.Oldest:
+                    query = query.OrderBy(d => d.CreateDate);
+                    break;
+                case FilterCandleOrder.MostExpensive:
+                    query = query.OrderByDescending(d => d.Price);
+                    break;
+                case FilterCandleOrder.Cheapest:
+                    query = query.OrderBy(d => d.Price);
+                    break;
+                default:
+                    query = query.OrderByDescending(d => d.CreateDate);
+                    break;
+            }
+            switch (filter.CandleStatus)
+            {
+                case FilterCandleStatus.All:
+                    break;
+                case FilterCandleStatus.Available:
+                    query = query.Where(d => d.IsAvailable);
+                    break;
+                case FilterCandleStatus.NotAvailable:
+                    query = query.Where(d => !d.IsAvailable);
+                    break;
+                case FilterCandleStatus.HasStockCount:
+                    query = query.Where(d => d.CandleDetails.Any(v => v.StockCount > 0));
+                    break;
+                case FilterCandleStatus.HasZeroStockCount:
+                    query = query.Where(d => !d.CandleDetails.Any(v => v.StockCount > 0));
+                    break;
+                default:
+                    break;
+            }
+            #endregion
+
+            #region Filter
+
+            #region Title
+            if (!string.IsNullOrWhiteSpace(filter.Title))
+            {
+                var searchTitle = filter.Title.Trim();
+                query = query.Where(p => EF.Functions.Like(p.Title, $"%{searchTitle}%"));
+            }
+            #endregion
+
+            #region Price
+            if (filter.StartPrice != null)
+            {
+                query = query.Where(d => d.Price >= filter.StartPrice);
+            }
+            if (filter.EndPrice != null)
+            {
+                query = query.Where(d => d.Price <= filter.EndPrice);
+            }
+            if (await query.AnyAsync())
+            {
+                filter.MostPrice = await query.MaxAsync(d => d.Price);
+                filter.LeastPrice = await query.MinAsync(d => d.Price);
+            }
+            #endregion
+
+            #region Category
+            if (filter.CategoryId is > 0)
+            {
+                query = query.Where(d => d.SelectedCategories.Any(s => s.CategoryId == filter.CategoryId));
+            }
+            #endregion
+
+            #region Color
+            if (filter.ColorId is > 0)
+            {
+                query = query.Where(d => d.CandleDetails.Any(s => s.ColorId == filter.ColorId));
+            }
+            #endregion
+
+            #region Scent
+            if (filter.ScentId is > 0)
+            {
+                query = query.Where(d => d.CandleDetails.Any(s => s.ScentId == filter.ScentId));
+            }
+            #endregion
+
+            #region Size
+            if (filter.SizeId is > 0)
+            {
+                query = query.Where(d => d.CandleDetails.Any(s => s.SizeId == filter.SizeId));
+            }
+            #endregion
+
+            #endregion
+
+            #region Paging
+            var pager = Pager.Build(filter.PageId, await query.CountAsync(), filter.TakeEntity, filter.HowManyShowPageAfterAndBefore);
+            var allEntities = await query.Paging(pager).ToListAsync();
+            #endregion
+
+            return filter.SetData(allEntities).SetPaging(pager);
         }
         public async Task<EditCandleDTO> GetEditCandle(long candleId)
         {
@@ -260,9 +368,43 @@ namespace EShop.Application.Services.Implementations
             await _categoryRepository.SaveAsync();
             return true;
         }
-        public Task<FilterCategoryDTO> FilterCategory(FilterCategoryDTO filter)
+        public async Task<FilterCategoryDTO> FilterCategory(FilterCategoryDTO filter)
         {
-            throw new NotImplementedException();
+            #region Query
+            var query = _categoryRepository.GetQuery()
+                .OrderByDescending(d => d.CreateDate).AsQueryable();
+            #endregion
+
+            #region Switch
+            switch (filter.CategoryStatus)
+            {
+                case FilterCategoryStatus.All:
+                    break;
+                case FilterCategoryStatus.Active:
+                    query = query.Where(d => d.IsActive);
+                    break;
+                case FilterCategoryStatus.DeActive:
+                    query = query.Where(d => !d.IsActive);
+                    break;
+                default:
+                    break;
+            }
+            #endregion
+
+            #region Filter
+            if (!string.IsNullOrWhiteSpace(filter.Title))
+            {
+                var searchTitle = filter.Title.Trim();
+                query = query.Where(p => EF.Functions.Like(p.Title, $"%{searchTitle}%"));
+            }
+            #endregion
+
+            #region Paging
+            var pager = Pager.Build(filter.PageId, await query.CountAsync(), filter.TakeEntity, filter.HowManyShowPageAfterAndBefore);
+            var allEntities = await query.Paging(pager).ToListAsync();
+            #endregion
+
+            return filter.SetData(allEntities).SetPaging(pager);
         }
         public async Task<EditCategoryDTO> GetEditCategory(long categortId)
         {

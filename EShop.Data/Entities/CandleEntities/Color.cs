@@ -4,5 +4,6 @@ namespace EShop.Data.Entities.CandleEntities;
 public class Color : BaseEntity
 {
     public string Title { get; set; }
+    public string ColorCode { get; set; }
     public ICollection<CandleDetail> CandleDetails { get; set; }
 }

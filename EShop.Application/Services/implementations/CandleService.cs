@@ -1,9 +1,9 @@
-﻿using EShop.Data.DTOs.Paging;
-using EShop.Application.Extensions;
+﻿using EShop.Application.Extensions;
 using EShop.Application.Services.Interfaces;
 using EShop.Application.Utils;
 using EShop.Data.DTOs.CandleCategory;
 using EShop.Data.DTOs.Candles;
+using EShop.Data.DTOs.Paging;
 using EShop.Data.Entities.CandleEntities;
 using EShop.Data.Entities.OrderEntities;
 using EShop.Data.Repository;
@@ -476,25 +476,66 @@ namespace EShop.Application.Services.Implementations
         #endregion
 
         #region Color
-        public Task<FilterColorDTO> FilterColor(FilterColorDTO filter)
+        public async Task<FilterColorDTO> FilterColor(FilterColorDTO filter)
         {
-            throw new NotImplementedException();
+            var query = _colorRepository.GetQuery().OrderByDescending(d => d.CreateDate).AsQueryable();
+
+            #region Filter
+            if (!string.IsNullOrWhiteSpace(filter.Title))
+            {
+                var searchTitle = filter.Title.Trim();
+                query = query.Where(p => EF.Functions.Like(p.Title, $"%{searchTitle}%"));
+            }
+            #endregion
+
+            #region Paging
+            var pager = Pager.Build(filter.PageId, await query.CountAsync(), filter.TakeEntity, filter.HowManyShowPageAfterAndBefore);
+            var allEntities = await query.Paging(pager).ToListAsync();
+            #endregion
+
+            return filter.SetData(allEntities).SetPaging(pager);
         }
-        public Task CreateColor(CreateColorDTO dto)
+        public async Task<List<Color>> GetAllCandleColors()
         {
-            throw new NotImplementedException();
+            return await _colorRepository.GetQuery().ToListAsync();
         }
-        public Task<EditColorDTO> GetEditColor(long colorId)
+        public async Task CreateColor(CreateColorDTO dto)
         {
-            throw new NotImplementedException();
+            var color = new Color
+            {
+                Title = dto.Title,
+                ColorCode = dto.ColorCode
+            };
+            await _colorRepository.AddEntity(color);
+            await _colorRepository.SaveAsync();
         }
-        public Task EditColor(EditColorDTO dto)
+        public async Task<EditColorDTO> GetEditColor(long colorId)
         {
-            throw new NotImplementedException();
+            var data = await _colorRepository.GetEntityById(colorId);
+            return new EditColorDTO
+            {
+                Title = data.Title,
+                ColorCode = data.ColorCode,
+                ColorId = data.Id
+            };
         }
-        public Task<bool> DeleteColor(long colorId)
+        public async Task EditColor(EditColorDTO dto)
         {
-            throw new NotImplementedException();
+            var data = await _colorRepository.GetEntityById(dto.ColorId);
+            data.Title = dto.Title;
+            data.ColorCode = dto.ColorCode;
+            _colorRepository.EditEntity(data);
+            await _colorRepository.SaveAsync();
+        }
+        public async Task<bool> DeleteColor(long colorId)
+        {
+            var InUse = await _candleDetailRepository.GetQuery().AnyAsync(c => c.ColorId == colorId);
+            if (InUse) return false;
+
+            var data  = await _colorRepository.GetEntityById(colorId);
+            _colorRepository.DeleteEntity(data);
+            await _colorRepository.SaveAsync();
+            return true;
         }
         #endregion
 
@@ -545,21 +586,49 @@ namespace EShop.Application.Services.Implementations
         #endregion
 
         #region Gallery
-        public Task CreateGallery(CreateGalleryDTO dto)
+        public async Task CreateGallery(CreateGalleryDTO dto)
         {
-            throw new NotImplementedException();
+            var gallery = new Gallery
+            {
+                Order = dto.Order,
+                CandleId = dto.CandleID
+            };
+
+            #region Main Image
+            var mainImageName = Guid.NewGuid().ToString("N") + Path.GetExtension(dto.ImageName.FileName);
+            dto.ImageName.AddImageToServer(mainImageName, PathExtension.CandleGalleryServer,
+                                                       150, 150, PathExtension.CandleGalleryThumbServer);
+            gallery.ImageName = mainImageName;
+            #endregion
+
+            await _galleryRepository.AddEntity(gallery);
+            await _galleryRepository.SaveAsync();
         }
-        public Task<EditGalleryDTO> GetEditGallery(long galleryId)
+        public async Task<EditGalleryDTO> GetEditGallery(long galleryId)
         {
-            throw new NotImplementedException();
+            var data = await _galleryRepository.GetEntityById(galleryId);
+            return new EditGalleryDTO
+            {
+                Order = data.Order,
+                GalleryID = data.Id
+            };
         }
-        public Task EditGallery(EditGalleryDTO dto)
+        public async Task EditGallery(EditGalleryDTO dto)
         {
-            throw new NotImplementedException();
+            var data = await _galleryRepository.GetEntityById(dto.GalleryID);
+            data.Order = dto.Order;
+            _galleryRepository.EditEntity(data);
+            await _galleryRepository.SaveAsync();
         }
-        public Task<bool> DeleteGallery(long galleryId)
+        public async Task<bool> DeleteGallery(long galleryId)
         {
-            throw new NotImplementedException();
+            var data = await _galleryRepository.GetQuery().FirstOrDefaultAsync(d => d.Id == galleryId);
+            if (data == null) return false;
+
+            data.ImageName.DeleteImage(PathExtension.CandleGalleryImage, PathExtension.CandleGalleryThumb);
+            _galleryRepository.DeletePermanent(data);
+            await _galleryRepository.SaveAsync();
+            return true;
         }
         #endregion
     }

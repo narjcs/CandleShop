@@ -1,5 +1,6 @@
 ﻿using EShop.Data.DTOs.Candles;
 using EShop.Data.DTOs.CandleCategory;
+using EShop.Data.Entities.CandleEntities;
 
 namespace EShop.Application.Services.Interfaces
 {
@@ -33,6 +34,7 @@ namespace EShop.Application.Services.Interfaces
 
         #region Color
         Task<FilterColorDTO> FilterColor(FilterColorDTO filter);
+        Task<List<Color>> GetAllCandleColors();
         Task CreateColor(CreateColorDTO dto);
         Task<EditColorDTO> GetEditColor(long colorId);
         Task EditColor(EditColorDTO dto);
